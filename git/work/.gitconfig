@@ -1,0 +1,14 @@
+[user]
+    name = Jacob Michael
+    email = jacob.michael@ametek.com
+
+[core]
+    editor = nvim
+    excludesfile = ~/.gitignore_global
+
+[alias]
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    last = log -1 HEAD
