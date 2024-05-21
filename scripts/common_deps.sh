@@ -5,9 +5,7 @@ COMMON_DEPENDENCIES=(
     curl
     git
     stow
-    wgetlibevent-dev
-    ncurses-dev
+    wget
     build-essential
     bison
-    pkg-config
   )
