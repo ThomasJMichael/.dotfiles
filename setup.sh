@@ -38,7 +38,7 @@ move_files() {
     for file in $(find "$source_dir" -type f); do
         target_file="${target_dir}/${file#$source_dir/}"
         if [ -e "$target_file" ]; then
-            mkdir -p "$(dirname "$target_file")"
+            mkdir -p "$(dirname "$BACKUP_DIR/${file#$source_dir/}")"
             mv "$target_file" "$BACKUP_DIR/${file#$source_dir/}"
         fi
     done
