@@ -25,20 +25,82 @@ NVIM_DIR="$DOTFILES_DIR/nvim"
 TMUX_DIR="$DOTFILES_DIR/tmux"
 BASH_DIR="$DOTFILES_DIR/bash"
 # PRIVATE_REPO_DIR="$DOTFILES_DIR/private"
+BACKUP_DIR="$HOME/dotfiles_backup"
+
+# Create backup directory if it doesn't exist
+mkdir -p $BACKUP_DIR
+
+# Helper function to handle moving files
+move_files() {
+    local source_dir=$1
+    local target_dir=$2
+
+    for file in $(find "$source_dir" -type f); do
+        target_file="${target_dir}/${file#$source_dir/}"
+        if [ -e "$target_file" ]; then
+            mkdir -p "$(dirname "$target_file")"
+            mv "$target_file" "$BACKUP_DIR/${file#$source_dir/}"
+        fi
+    done
+}
+
+# Function to backup existing configurations by moving them
+backup_configs() {
+    echo "Backing up existing configurations..."
+
+    move_files "$GIT_DIR" "$HOME"
+    move_files "$NVIM_DIR" "$HOME"
+    move_files "$TMUX_DIR" "$HOME"
+    move_files "$BASH_DIR" "$HOME"
+
+    echo "Backup complete."
+}
+
+# Function to restore original configurations
+restore_configs() {
+    echo "Restoring original configurations..."
+
+    move_files "$BACKUP_DIR/$GIT_DIR" "$HOME"
+    move_files "$BACKUP_DIR/$NVIM_DIR" "$HOME"
+    move_files "$BACKUP_DIR/$TMUX_DIR" "$HOME"
+    move_files "$BACKUP_DIR/$BASH_DIR" "$HOME"
+
+    echo "Restore complete."
+}
 
 # Function to stow configurations
 stow_configs() {
     echo "Stowing configurations for $CONFIG..."
 
-    stow -v --target=$HOME -d $GIT_DIR
-    stow -v --target=$HOME -d $NVIM_DIR
-    stow -v --target=$HOME -d $TMUX_DIR
-    stow -v --target=$HOME -d $BASH_DIR
+    cd $DOTFILES_DIR
 
-    # Uncomment the following lines when you add the private repo
-    # if [ -d "$PRIVATE_REPO_DIR/$CONFIG" ]; then
-    #     stow -v --target=$HOME -d $PRIVATE_REPO_DIR/$CONFIG
-    # fi
+    if [ -d "git/$CONFIG" ]; then
+        echo "Stowing git/$CONFIG..."
+        stow -v --target=$HOME -d "$DOTFILES_DIR/git" "$CONFIG"
+    else
+        echo "Directory git/$CONFIG does not exist. Skipping."
+    fi
+
+    if [ -d "nvim" ]; then
+        echo "Stowing nvim..."
+        stow -v --target=$HOME -d "$DOTFILES_DIR" "nvim"
+    else
+        echo "Directory nvim does not exist. Skipping."
+    fi
+
+    if [ -d "tmux" ]; then
+        echo "Stowing tmux..."
+        stow -v --target=$HOME -d "$DOTFILES_DIR" "tmux"
+    else
+        echo "Directory tmux does not exist. Skipping."
+    fi
+
+    if [ -d "bash" ]; then
+        echo "Stowing bash..."
+        stow -v --target=$HOME -d "$DOTFILES_DIR" "bash"
+    else
+        echo "Directory bash does not exist. Skipping."
+    fi
 
     echo "Stowing complete."
 }
@@ -47,48 +109,59 @@ stow_configs() {
 clean_configs() {
     echo "Cleaning configurations for $CONFIG..."
 
-    stow -D --target=$HOME -d $GIT_DIR
-    stow -D --target=$HOME -d $NVIM_DIR
-    stow -D --target=$HOME -d $TMUX_DIR
-    stow -D --target=$HOME -d $BASH_DIR
+    cd $DOTFILES_DIR
 
-    # Add the private dotfiles repo
-    # if [ -d "$PRIVATE_REPO_DIR/$CONFIG" ]; then
-    #     stow -D --target=$HOME -d $PRIVATE_REPO_DIR/$CONFIG
-    # fi
+    if [ -d "git/$CONFIG" ]; then
+        echo "Unstowing git/$CONFIG..."
+        stow -D --target=$HOME -d "$DOTFILES_DIR/git" "$CONFIG"
+    else
+        echo "Directory git/$CONFIG does not exist. Skipping."
+    fi
+
+    if [ -d "nvim" ]; then
+        echo "Unstowing nvim..."
+        stow -D --target=$HOME -d "$DOTFILES_DIR" "nvim"
+    else
+        echo "Directory nvim does not exist. Skipping."
+    fi
+
+    if [ -d "tmux" ]; then
+        echo "Unstowing tmux..."
+        stow -D --target=$HOME -d "$DOTFILES_DIR" "tmux"
+    else
+        echo "Directory tmux does not exist. Skipping."
+    fi
+
+    if [ -d "bash" ]; then
+        echo "Unstowing bash..."
+        stow -D --target=$HOME -d "$DOTFILES_DIR" "bash"
+    else
+        echo "Directory bash does not exist. Skipping."
+    fi
+
+    restore_configs
 
     echo "Cleaning complete."
 }
 
 # Function to install dependencies
 install_dependencies() {
-    echo "Installing dependencies for $CONFIG..."
-    if [ "$CONFIG" == "personal" ]; then
-        bash $DOTFILES_DIR/scripts/install_personal_dependencies.sh
-    elif [ "$CONFIG" == "work" ]; then
-        bash $DOTFILES_DIR/scripts/install_work_dependencies.sh
+    echo "Installing dependencies..."
+    if [ -f $DOTFILES_DIR/scripts/install_deps.sh ]; then
+        bash $DOTFILES_DIR/scripts/install_deps.sh
+    else
+        echo "Error: Dependencies script not found."
     fi
     echo "Dependencies installed."
 }
 
-# # Function to setup private repo
-# setup_private_repo() {
-#     if [ ! -d "$PRIVATE_REPO_DIR" ]; then
-#         git submodule add git@github.com:yourusername/private-configs.git $PRIVATE_REPO_DIR
-#         git submodule update --init --recursive
-#     else
-#         git submodule update --recursive --remote
-#     fi
-# }
-
 # Main script execution
+install_dependencies
 if [ "$CLEAN" == true ]; then
     clean_configs
+else
+    backup_configs
+    stow_configs
 fi
-
-# setup_private_repo
-
-stow_configs
-install_dependencies
 
 echo "Setup complete for $CONFIG."
