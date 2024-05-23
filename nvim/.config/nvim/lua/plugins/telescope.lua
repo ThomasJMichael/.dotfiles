@@ -37,7 +37,23 @@ return {
 
 			-- Shortcut for searching your Neovim configuration files
 			vim.keymap.set("n", "<leader>sn", function()
-				builtin.find_files({ cwd = vim.fn.stdpath("config") })
+        local function resolve_symlink(path)
+          return vim.loop.fs_realpath(path) or path
+        end
+
+        local function find_init_lua_dir()
+          local config_dir = vim.fn.stdpath("config")
+          local init_lua_path = config_dir .. "/init.lua"
+          local resolved_path = resolve_symlink(init_lua_path)
+          return vim.fn.fnamemodify(resolved_path,":h")
+        end
+
+        local init_lua_dir = find_init_lua_dir()
+        if init_lua_dir then
+          builtin.find_files({ cwd = init_lua_dir })
+        else
+          vim.notify("Failed to resolve init.lua dir")
+        end
 			end, { desc = "[S]earch [N]eovim files" })
 		end,
 	},
