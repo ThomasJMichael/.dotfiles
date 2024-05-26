@@ -1,4 +1,4 @@
--- Set highlight on search, but clear by <leader>h
+-- Set highlight on search, but clear by <leader><Esc>
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<leader><Esc>', ':nohlsearch<CR>')
 
