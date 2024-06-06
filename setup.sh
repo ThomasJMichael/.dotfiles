@@ -155,8 +155,19 @@ install_dependencies() {
     echo "Dependencies installed."
 }
 
+copy_scripts() {
+  local target_dir=~/bin/.local/scripts
+  mkdir -p "$target_dir"
+  cp -r "$DOTFILES_DIR/bin/.local/scripts/"* "$target_dir"
+
+  chmod +x ~/bin/.local/scripts/*
+}
+
+# Ensure the scripts are executable
+
 # Main script execution
 install_dependencies
+copy_scripts
 if [ "$CLEAN" == true ]; then
     clean_configs
 else

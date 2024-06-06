@@ -8,4 +8,5 @@ COMMON_DEPENDENCIES=(
     wget
     build-essential
     bison
+    fzf
   )
