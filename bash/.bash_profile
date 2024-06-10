@@ -21,7 +21,7 @@ addToPathFront() {
     fi
 }
 
-addToPathFront "$HOME/bin/.local/scripts"
+addToPathFront "$HOME/.local/bin"
 
 if command -v tmux > /dev/null && [ -z "$TMUX" ]; then
   tmux_auto.sh

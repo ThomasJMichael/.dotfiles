@@ -156,7 +156,7 @@ install_dependencies() {
 }
 
 copy_scripts() {
-  local target_dir=~/bin/.local/scripts
+  local target_dir=~/.local/bin
   mkdir -p "$target_dir"
   cp -r "$DOTFILES_DIR/bin/.local/scripts/"* "$target_dir"
 
